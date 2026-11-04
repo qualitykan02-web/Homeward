@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard สถานการณ์ HomeWard จังหวัดกาญจนบุรี</title>
+<style>
+:root{
+  --green:#1FA971; --dgreen:#0E7C5A; --tgreen:#E3F6EC;
+  --blue:#3AA8E0; --dblue:#1B7FB5; --tblue:#E3F2FB;
+  --pink:#EC4C8A; --dpink:#C2185B; --tpink:#FDE7F0;
+  --ink:#1F2D3A; --muted:#5F6B76; --line:#D6E8E0; --bg:#F4FAF8;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Sarabun","Noto Sans Thai","Leelawadee UI","Tahoma","Loma",sans-serif;font-size:15px;line-height:1.5}
+.wrap{max-width:1200px;margin:0 auto;padding:0 16px}
+header.hero{position:relative;overflow:hidden;color:#fff;background:linear-gradient(100deg,#12A07A 0%,#2AA4B8 55%,#3AA8E0 100%)}
+header.hero .wrap{position:relative;display:flex;align-items:center;gap:20px;min-height:210px;padding-top:22px;padding-bottom:46px}
+.logo{flex:none;width:92px;height:92px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 4px 14px rgba(0,0,0,.15)}
+.hero h1{margin:0;font-size:clamp(22px,3.6vw,38px);line-height:1.2;font-weight:700}
+.hero p{margin:6px 0 0;font-size:clamp(13px,1.8vw,18px);opacity:.95}
+.scene{position:absolute;right:0;bottom:0;height:100%;width:min(46%,520px);pointer-events:none}
+.scene svg{height:100%;width:100%}
+.wave{position:absolute;left:0;right:0;bottom:-1px;height:44px;width:100%}
+.deco{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+nav.tabs{position:sticky;top:0;z-index:20;background:#fff;border-bottom:3px solid var(--pink);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+nav.tabs .wrap{display:flex;gap:6px;overflow-x:auto;align-items:center;padding-top:8px;padding-bottom:8px}
+nav.tabs button{font:inherit;border:0;background:var(--tgreen);color:var(--dgreen);padding:9px 18px;border-radius:999px;cursor:pointer;white-space:nowrap;font-weight:600;transition:.15s}
+nav.tabs button:hover{background:#cfeedd}
+nav.tabs button.on{background:linear-gradient(90deg,var(--green),var(--blue));color:#fff;box-shadow:0 2px 8px rgba(31,169,113,.35)}
+main{padding:10px 0 40px}
+.tab{display:none}
+.tab.on{display:block;animation:fade .25s}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.grid{display:grid;gap:14px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:1fr 1fr}
+.kpi{display:flex;gap:12px;align-items:center;background:var(--tint);border-left:6px solid var(--acc);border-radius:12px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.kpi .ico{flex:none;width:46px;height:46px;border-radius:50%;background:var(--acc);display:grid;place-items:center}
+.kpi .ico svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.kpi .lab{font-size:13px;color:var(--muted);font-weight:600}
+.kpi .val{font-size:30px;font-weight:800;color:var(--deep);line-height:1.15}
+.kpi .sub{font-size:12px;color:var(--muted)}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.card h3{margin:0 0 12px;font-size:17px;color:var(--dgreen);display:flex;align-items:center;gap:8px}
+.card h3::before{content:"";width:6px;height:20px;border-radius:3px;background:linear-gradient(var(--green),var(--blue))}
+.sec{margin:26px 0 12px;display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700;color:var(--dgreen)}
+.sec i{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--green),var(--blue));display:grid;place-items:center}
+.sec svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.donutwrap{display:flex;align-items:center;gap:18px;flex-wrap:wrap;justify-content:center}
+.donutwrap.col{flex-direction:column}
+.donutwrap svg{width:220px;height:220px;flex:none}
+.lg{width:100%;font-size:13.5px}
+.lg div{display:flex;align-items:center;gap:8px;margin:4px 0}
+.lg b.sw{flex:none;width:13px;height:13px;border-radius:3px}
+.lg .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lg .n{font-weight:800}
+.lg .p{color:var(--muted);font-size:12.5px;min-width:46px;text-align:right}
+.sl{cursor:pointer;transition:stroke-width .12s}
+.sl.hl{stroke-width:38}
+.lg div.lr{cursor:pointer;border-radius:6px;padding:2px 4px;margin:2px 0}
+.lg div.lr.hl{background:#EEF7F3}
+#tip{position:fixed;z-index:60;pointer-events:none;display:none;max-width:320px;background:#fff;border:1px solid var(--line);border-left:6px solid var(--tc,#1FA971);border-radius:10px;padding:8px 12px;box-shadow:0 6px 20px rgba(0,0,0,.18);font-size:13.5px;line-height:1.4}
+#tip b{display:block;color:var(--ink)}
+#tip span{color:var(--muted)}
+.tw{overflow-x:auto;border-radius:12px;border:1px solid var(--line);background:#fff}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{background:linear-gradient(90deg,var(--green),#25A794);color:#fff;font-weight:600;padding:9px 8px;text-align:center;white-space:nowrap}
+td{padding:7px 8px;border-top:1px solid #E5F0EB;text-align:center}
+td.l,th.l{text-align:left}
+tbody tr:nth-child(even){background:#F4FBF8}
+tr.tot td{background:var(--tgreen);font-weight:700;color:var(--dgreen)}
+td.bar{background-repeat:no-repeat;background-position:left center}
+.note{font-size:12.5px;color:var(--muted);margin-top:10px}
+footer{background:#fff;border-top:3px solid var(--green);padding:14px 0;font-size:12.5px;color:var(--muted)}
+@media (max-width:900px){
+  .g4{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:1fr} .g2{grid-template-columns:1fr}
+  .scene{opacity:.28;width:70%} .logo{width:64px;height:64px}
+}
+.hc{display:inline-block;background:var(--tpink);color:var(--dpink);border-radius:999px;padding:1px 10px;margin:2px 4px 2px 0;font-size:12.5px;line-height:1.5}
+.hc b{color:var(--dpink)}
+td.hl{text-align:left;min-width:280px}
+.mini{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.mini div{background:var(--tint);border-top:4px solid var(--acc);border-radius:10px;padding:10px 8px;text-align:center}
+.mini span{display:block;font-size:12.5px;color:var(--muted);font-weight:600}
+.mini b{display:block;font-size:26px;line-height:1.2;color:var(--deep)}
+.selbox{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.selbox label{font-weight:700;color:var(--dgreen)}
+.selbox select{flex:1;min-width:260px;font:inherit;font-size:16px;padding:10px 14px;border:2px solid var(--green);border-radius:12px;background:#fff;color:var(--ink);cursor:pointer}
+.selbox select:focus{outline:3px solid #cfeedd}
+tr[data-h]{cursor:pointer}
+tr[data-h]:hover td{background:#FFF6D6}
+tr[data-h].cur td{background:#FFEFB5;font-weight:600}
+.scroll{max-height:470px;overflow:auto}
+.scroll th{position:sticky;top:0}
+.donutwrap.wide{flex-wrap:nowrap;justify-content:flex-start;gap:36px;padding:6px 10px}
+.donutwrap.wide svg{width:250px;height:250px}
+.donutwrap.wide .lg{flex:1;min-width:0;width:auto}
+@media (max-width:900px){.mini{grid-template-columns:repeat(3,1fr)} .donutwrap.wide{flex-wrap:wrap;justify-content:center}}
+.sp{flex:1}
+nav.tabs button.live{background:#fff;border:1px solid var(--line);color:var(--muted);font-weight:500;font-size:13px;padding:7px 14px;display:flex;align-items:center;gap:8px}
+.live i{width:10px;height:10px;border-radius:50%;background:#9AA7B1;display:inline-block;flex:none}
+.live.ok i{background:#1FA971;animation:pulse 2s infinite}
+.live.load i{background:#3AA8E0;animation:pulse 1s infinite}
+.live.warn i{background:#F5A623}
+.live.err i{background:#EC4C8A}
+@keyframes pulse{50%{opacity:.3}}
+.banner{display:none;margin:14px 0 0;padding:10px 14px;border-radius:10px;font-size:14px}
+.banner.warn{display:block;background:#FFF6DD;color:#8A5A00;border:1px solid #F3DDA0}
+.banner.err{display:block;background:var(--tpink);color:var(--dpink);border:1px solid #f6b9d1}
+.banner small{display:block;opacity:.85;margin-top:2px;font-size:12.5px}
+@media (max-width:700px){#livetxt{max-width:150px;overflow:hidden;text-overflow:ellipsis}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <svg class="deco" viewBox="0 0 1200 240" preserveAspectRatio="none" aria-hidden="true">
+    <circle cx="140" cy="40" r="110" fill="#fff" opacity=".10"/>
+    <circle cx="640" cy="215" r="130" fill="#fff" opacity=".09"/>
+    <circle cx="900" cy="30" r="90" fill="#fff" opacity=".09"/>
+    <g fill="#fff" opacity=".45">
+      <path d="M845 30h10v10h10v10h-10v10h-10V50h-10V40h10z"/><path d="M660 190h8v8h8v8h-8v8h-8v-8h-8v-8h8z"/><path d="M1060 200h7v7h7v7h-7v7h-7v-7h-7v-7h7z"/>
+    </g>
+  </svg>
+  <div class="wrap">
+    <div class="logo" aria-hidden="true">
+      <svg width="62" height="62" viewBox="0 0 62 62"><rect x="22" y="6" width="18" height="50" rx="6" fill="#EC4C8A"/><rect x="6" y="22" width="50" height="18" rx="6" fill="#EC4C8A"/><circle cx="31" cy="31" r="8" fill="#1FA971"/></svg>
+    </div>
+    <div>
+      <h1 id="h-title"></h1>
+      <p id="h-sub"></p>
+    </div>
+  </div>
+  <div class="scene" id="scene"></div>
+  <svg class="wave" viewBox="0 0 1200 44" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 22 C150 4 300 40 480 22 S840 6 1200 26 V44 H0Z" fill="#F48FB1"/>
+    <path d="M0 32 C200 18 380 44 600 30 S1000 20 1200 34 V44 H0Z" fill="#FDE2EE"/>
+    <path d="M0 40 C300 30 700 46 1200 38 V44 H0Z" fill="#F4FAF8"/>
+  </svg>
+</header>
+
+<nav class="tabs"><div class="wrap">
+  <button class="on" data-t="ov">ภาพรวมจังหวัด</button>
+  <button data-t="hp">รายโรงพยาบาล</button>
+  <button data-t="dx">การวินิจฉัยโรคที่พบ</button>
+  <span class="sp"></span>
+  <button class="live" id="live" type="button"><i></i><span id="livetxt">กำลังเชื่อมต่อ…</span></button>
+</div></nav>
+
+<main><div class="wrap">
+  <div id="banner" class="banner"></div>
+  <section class="tab on" id="ov"></section>
+  <section class="tab" id="hp"></section>
+  <section class="tab" id="dx"></section>
+</div></main>
+
+<div id="tip"></div>
+<footer><div class="wrap">ที่มา: Google Sheets “HW Dashboard” (สถานการณ์ของโรงพยาบาล จังหวัดกาญจนบุรี และรายการวินิจฉัยโรค) • HomeWard (A-MED Homeward) • ข้อมูลอัปเดตอัตโนมัติจากไฟล์ต้นทาง</footer>
+
+<script>
+/* ===== ข้อมูล (คัดลอกจากไฟล์ HW Dashboard)
+   hosp = [รหัส, โรงพยาบาล, อำเภอ, ตำบล, Admit สะสม, กำลังรักษา, หายป่วย, อาการทุเลา, อาการไม่ทุเลา, เสียชีวิต]
+   diag = [รหัสโรค, ชื่อโรค, จำนวนสะสม]
+   dh   = [โรงพยาบาล, รหัสโรค, ชื่อโรค, จำนวน] (โรคแยกรายโรงพยาบาล) */
+const SNAPSHOT = {"hosp": [[11284, "โรงพยาบาลสังขละบุรี", "สังขละบุรี", "หนองลู", 85, 0, 0, 83, 2, 0], [11282, "โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "ท่าม่วง", "ท่าม่วง", 57, 0, 0, 56, 0, 1], [21948, "โรงพยาบาลห้วยกระเจาเฉลิมพระเกียรติ ๘๐ พรรษา", "ห้วยกระเจา", "ห้วยกระเจา", 20, 0, 11, 5, 3, 1], [11288, "โรงพยาบาลพยาบาลสถานพระบารมี", "หนองปรือ", "สมเด็จเจริญ", 13, 0, 8, 3, 1, 1], [11278, "โรงพยาบาลไทรโยค", "ไทรโยค", "ลุ่มสุ่ม", 9, 0, 1, 7, 0, 1], [10731, "โรงพยาบาลพหลพลพยุหเสนา", "เมืองกาญจนบุรี", "ปากแพรก", 8, 0, 1, 6, 0, 1], [10732, "โรงพยาบาลมะการักษ์", "ท่ามะกา", "ท่ามะกา", 7, 0, 2, 0, 1, 4], [11280, "โรงพยาบาลบ่อพลอย", "บ่อพลอย", "บ่อพลอย", 7, 0, 0, 1, 0, 6], [11281, "โรงพยาบาลท่ากระดาน", "ศรีสวัสดิ์", "ท่ากระดาน", 5, 1, 2, 1, 1, 0], [11287, "โรงพยาบาลด่านมะขามเตี้ย", "ด่านมะขามเตี้ย", "ด่านมะขามเตี้ย", 4, 2, 1, 0, 0, 1], [11286, "โรงพยาบาลเลาขวัญ", "เลาขวัญ", "เลาขวัญ", 4, 0, 0, 2, 0, 2], [11283, "โรงพยาบาลทองผาภูมิ", "ทองผาภูมิ", "ท่าขนุน", 3, 0, 0, 0, 0, 3], [11285, "โรงพยาบาลเจ้าคุณไพบูลย์พนมทวน", "พนมทวน", "พนมทวน", 2, 0, 1, 1, 0, 0], [14136, "โรงพยาบาลศุกร์ศิริศรีสวัสดิ์", "ศรีสวัสดิ์", "ด่านแม่แฉลบ", 1, 0, 0, 0, 0, 1], [11279, "โรงพยาบาลสมเด็จพระปิยมหาราชรมณียเขต", "ไทรโยค", "ไทรโยค", 0, 0, 0, 0, 0, 0], [41701, "โรงพยาบาลหนองปรือ", "หนองปรือ", "หนองปรือ", 0, 0, 0, 0, 0, 0]], "diag": [["F15.20", "Other stimulants including caffeine, Dependence sydrome, Currently abstinent", 78], ["F12.20", "Cannabinoids, Dependence sydrome, Currently abstinent", 59], ["U07.2", "โรคติดเชื้อไวรัสโคโรนา (COVID-19, not identified)", 31], ["K35", "ไส้ติ่งอักเสบเฉียบพลัน", 23], ["F11.20", "Opioids, Dependence sydrome, Currently abstinent", 23], ["F12.9", "ความผิดปกติทางจิตและพฤติกรรมที่เกิดจากการเสพกัญชา ความผิดปกติอื่นทางจิตและพฤติกรรมที่ไม่ระบุรายละเอียด", 22], ["I10", "ความดันโลหิตสูงไม่ทราบสาเหตุ (ปฐมภูมิ)", 18], ["N39.0", "การติดเชื้อในทางเดินปัสสาวะ ไม่ระบุตำแหน่ง", 15], ["G47.0", "ความผิดปกติของการเริ่มต้นและการคงสภาพการหลับ (นอนไม่หลับ)", 10], ["F15.30", "Other stimulants including caffeine, Withdrawal state, Uncomplicated", 9], ["Z51.5", "การดูแลบรรเทาอาการ", 9], ["F10.70", "Alcohol, Residual and late-onset psychotic disorder, Flashbacks", 8], ["M62.60", "กล้ามเนื้อเคล็ด หลายตำแหน่ง", 7], ["F20.99", "โรคจิตเภทไม่ระบุรายละเอียด การดำเนินโรคไม่แน่นอน ระยะสังเกตุการณ์สั้นเกินไป", 7], ["E78.0", "ภาวะคอเลสเตอรอลในเลือดสูงเกินอย่างเดียว", 7], ["E10", "เบาหวานชนิดที่ต้องพึ่งอินซูลิน", 6], ["F32.00", "Mild depressive episode, Without somatic symptoms", 5], ["J20", "หลอดลมอักเสบเฉียบพลัน", 4], ["F11.00", "Opioids, Acute intoxication, Uncomplicated", 4], ["M94.0", "กลุ่มอาการรอยต่อกระดูกอ่อนซีโครง (ทีสเซ)", 3], ["N10", "หลอดไตฝอยและเนื้อเยื่อระหว่างหลอดไตฝอยอักเสบเฉียบพลัน", 3], ["J15", "ปอดบวมที่เกิดจากแบคทีเรีย มิได้จำแนกไว้ที่ใด", 3], ["G43", "โรคไมเกรน", 3], ["F10.1", "ความผิดปกติทางจิตและพฤติกรรมที่เกิดจากการเสพสุรา การเสพอย่างอันตราย", 2], ["M62.6", "กล้ามเนื้อเคล็ด", 2], ["J44.1", "โรคปอดอุดกั้นเรื้อรังร่วมกับการกำเริบเฉียบพลันไม่ระบุรายละเอียด", 2], ["N18.3", "Chronic kidney disease, stage 3", 2], ["F12.0", "ความผิดปกติทางจิตและพฤติกรรมที่เกิดจากการเสพกัญชา เป็นพิษเฉียบพลัน", 2], ["F10.2", "ความผิดปกติทางจิตและพฤติกรรมที่เกิดจากการเสพสุรา กลุ่มอาการติดยา", 2], ["R10.1", "ปวดเฉพาะท้องส่วนบน", 2], ["F10.20", "Alcohol, Dependence sydrome, Currently abstinent", 2], ["U07.1", "โรคติดเชื้อไวรัสโควิด2019", 2], ["J18", "ปอดบวม ไม่ระบุเชื้อต้นเหตุ", 2], ["F17.9", "ความผิดปกติทางจิตและพฤติกรรมที่เกิดจากการเสพยาสูบ ความผิดปกติอื่นทางจิตและพฤติกรรมที่ไม่ระบุรายละเอียด", 2], ["K59.0", "ท้องผูก", 2], ["F15.23", "Other stimulants including caffeine, Dependence sydrome, Currently abstinent, but receiving treatment with aversive or blocking drugs", 2], ["F12.02", "Cannabinoids, Acute intoxication, With other medical complications", 2], ["J45", "โรคหืด", 2], ["J00", "คอหอยส่วนจมูกอักเสบเฉียบพลัน (ไข้หวัด)", 2], ["L89.3", "Stage IV decubitus ulcer", 2], ["F51.0", "โรคนอนไม่หลับที่ไม่ได้เกิดจากโรคทางกาย", 2], ["I64", "โรคอัมพาตฉับพลัน ไม่ระบุว่าเกิดจากเลือดออกหรือเนื้อสมองตายเพราะขาดเลือด", 1], ["I67", "โรคหลอดเลือดสมองอื่น", 1], ["J06.9", "การติดเชื้อทางเดินหายใจส่วนบนเฉียบพลัน ไม่ระบุรายละเอียด", 1], ["J12.8", "ปอดบวมที่เกิดจากไวรัสอื่น", 1], ["J15.8", "ปอดบวมที่เกิดจากแบคทีเรียชนิดอื่น", 1], ["J16", "ปอดบวมที่เกิดจากเชื้ออื่น มิได้จำแนกไว้", 1], ["J18.0", "ปอดบวมชนิดบร็องโค ไม่ระบุรายละเอียด", 1], ["J18.1", "ปอดบวมทั้งกลีบ ไม่ระบุรายละเอียด", 1], ["J30", "เยื่อจมูกอักเสบจากการปรับขนาดหลอดเลือดและภูมิแพ้", 1], ["J30.3", "เยื่อจมูกอักเสบจากภูมิแพ้อื่น", 1], ["K12.09", "แอ็ฟทาที่กลับเป็นซ้ำ ไม่ระบุรายละเอียด", 1], ["K30", "อาหารไม่ย่อย", 1], ["L23", "ผิวหนังอักเสบจากสัมผัสภูมิแพ้", 1], ["L50", "ลมพิษ", 1], ["L89.1", "Stage II decubitus ulcer", 1], ["M10.0", "โรคเกาต์ที่ไม่ทราบสาเหตุ", 1], ["M10.99", "โรคเกาต์ ไม่ระบุรายละเอียดไม่ระบุตำแหน่ง", 1], ["M48.05", "ช่องไขสันหลังตีบ บริเวณทรวงอกร่วมเอว", 1], ["N40", "การเจริญเกินของต่อมลูกหมาก", 1], ["O23", "การติดเชื้อของระบบสืบพันธุ์และทางเดินปัสสาวะระหว่างตั้งครรภ์", 1], ["O23.9", "การติดเชื้ออื่นและที่ไม่ระบุรายละเอียดของระบบสืบพันธุ์และทางเดินปัสสาวะระหว่างตั้งครรภ์", 1], ["R54", "วัยชรา", 1], ["U11.9", "โรคติดเชื้อไวรัสโคโรนา 2019", 1], ["A09", "กระเพาะอาหารกับลำไส้อักเสบ และลำไส้ใหญ่อักเสบจากการติดเชื้อและจากสาเหตุที่ไม่ระบุรายละเอียด", 1], ["Z71", "บุคคลที่ขอรับบริการทางสาธารณสุขเพื่อการปรึกษาและคำแนะนำทางแพทย์อื่น ที่มิได้มีรหัสระบุไว้ที่อื่น", 1], ["A41", "การติดเชื้ออื่นในกระแสเลือด", 1], ["A41.9", "การติดเชื้อในกระแสเลือด ไม่ระบุชนิด", 1], ["B96.2", "เอสเซอริเซีย โคไล เป็นสาเหตุของโรคที่จำแนกไว้ในบทอื่น", 1], ["C16.6", "เนื้องอกร้ายด้านโค้งใหญ่ของกระเพาะอาหารไม่ระบุตำแหน่ง", 1], ["C22.0", "มะเร็งเซลล์ตับ", 1], ["C25", "เนื้องอกร้ายของตับอ่อน", 1], ["C34", "เนื้องอกร้ายของหลอดลมและปอด", 1], ["C37", "เนื้องอกร้ายของต่อมไทมัส", 1], ["C50.1", "เนื้องอกร้ายของส่วนกลางของเต้านม", 1], ["C50.2", "เนื้องอกร้ายของเสี้ยวบนด้านในของเต้านม", 1], ["C54.1", "เนื้องอกร้ายของเยื่อบุมดลูก", 1], ["C73", "เนื้องอกร้ายของต่อมไทรอยด์", 1], ["C78.7", "เนื้องอกร้ายทุติยภูมิของตับและท่อน้ำดีในตับ", 1], ["E03", "ภาวะต่อมไทรอยด์ทำงานน้อยแบบอื่น", 1], ["E11", "เบาหวานชนิดที่ไม่ต้องพึ่งอินซูลิน", 1], ["E11.4", "เบาหวานชนิดที่ไม่ต้องพึ่งอินซูลิน ร่วมกับภาวะแทรกซ้อนทางประสาท", 1], ["E16.0", "ภาวะน้ำตาลในเลือดต่ำจากยา ไม่มีภาวะโคม่า", 1], ["E78", "ความผิดปกติของเมตะบอลิซึมของไลโปโปรตีนและภาวะไขมันในเลือดอื่น", 1], ["E78.2", "ภาวะไขมันในเลือดสูงเกินแบบผสม", 1], ["E78.5", "ภาวะไขมันในเลือดสูงเกิน ไม่ระบุรายละเอียด", 1], ["E87.6", "ภาวะมีโพแทสเซียมในเลือดน้อยเกิน", 1], ["F10", "ความผิดปกติทางจิตและพฤติกรรมที่เกิดจากการเสพสุรา", 1], ["F10.02", "Alcohol, Acute intoxication, With other medical complications", 1], ["F10.9", "ความผิดปกติทางจิตและพฤติกรรมที่เกิดจากการเสพสุรา ความผิดปกติอื่นทางจิตและพฤติกรรมที่ไม่ระบุรายละเอียด", 1], ["F11.2", "ความผิดปกติทางจิตและพฤติกรรมที่เกิดจากการเสพฝิ่นและอนุพันธ์ของฝิ่น กลุ่มอาการติดยา", 1], ["F15.0", "ความผิดปกติทางจิตและพฤติกรรมที่เกิดจากการเสพสารกระตุ้นระบบประสาทอื่นรวมทั้งกาแฟ เป็นพิษเฉียบพลัน", 1], ["F15.00", "Other stimulants including caffeine, Acute intoxication, Uncomplicated", 1], ["F15.2", "ความผิดปกติทางจิตและพฤติกรรมที่เกิดจากการเสพสารกระตุ้นระบบประสาทอื่นรวมทั้งกาแฟ กลุ่มอาการติดยา", 1], ["F15.21", "Other stimulants including caffeine, Dependence sydrome, Currently abstinent, but in a protected environment", 1], ["F17.20", "Tobacco, Dependence sydrome, Currently abstinent", 1], ["F19.2", "ความผิดปกติทางจิตและพฤติกรรมที่เกิดจากการเสพยาหลายขนานและสารออกฤทธิ์ต่อจิตประสาทอื่น กลุ่มอาการติดยา", 1], ["F19.20", "Multiple drug use and use of other psychoactive substances, Dependence sydrome, Currently abstinent", 1], ["F19.50", "Multiple drug use and use of other psychoactive substances, Psychotic disorder, Schizophrenia-like", 1], ["F20", "โรคจิตเภท", 1], ["F20.00", "โรคจิตเภทแบบระแวง ต่อเนื่อง รวมถึงดื้อต่อการรักษา", 1], ["F20.90", "โรคจิตเภทไม่ระบุรายละเอียด ต่อเนื่อง รวมถึงดื้อต่อการรักษา", 1], ["F25.0", "ความผิดปกติแบบโรคจิตเภทกึ่งอารมณ์แปรปรวนชนิดเมเนีย", 1], ["G44", "กลุ่มอาการปวดศีรษะแบบอื่น", 1], ["I15.1", "ความดันโลหิตสูงจากความผิดปกติอื่นของไต", 1], ["I25.2", "กล้ามเนื้อหัวใจตายในอดีต", 1]], "dh": [["โรงพยาบาลสังขละบุรี", "F15.20", "Other stimulants including caffeine, Dependence sydrome, Currently abstinent", 78], ["โรงพยาบาลสังขละบุรี", "F12.20", "Cannabinoids, Dependence sydrome, Currently abstinent", 58], ["โรงพยาบาลสังขละบุรี", "F12.9", "ความผิดปกติทางจิตและพฤติกรรมที่เกิดจากการเสพกัญชา ความผิดปกติอื่นทางจิตและพฤติกรรมที่ไม่ระบุรายละเอียด", 22], ["โรงพยาบาลสังขละบุรี", "F11.20", "Opioids, Dependence sydrome, Currently abstinent", 20], ["โรงพยาบาลสังขละบุรี", "G47.0", "ความผิดปกติของการเริ่มต้นและการคงสภาพการหลับ (นอนไม่หลับ)", 10], ["โรงพยาบาลสังขละบุรี", "F15.30", "Other stimulants including caffeine, Withdrawal state, Uncomplicated", 9], ["โรงพยาบาลสังขละบุรี", "F10.70", "Alcohol, Residual and late-onset psychotic disorder, Flashbacks", 8], ["โรงพยาบาลสังขละบุรี", "M62.60", "กล้ามเนื้อเคล็ด หลายตำแหน่ง", 7], ["โรงพยาบาลสังขละบุรี", "F20.99", "โรคจิตเภทไม่ระบุรายละเอียด การดำเนินโรคไม่แน่นอน ระยะสังเกตุการณ์สั้นเกินไป", 7], ["โรงพยาบาลสังขละบุรี", "F32.00", "Mild depressive episode, Without somatic symptoms", 5], ["โรงพยาบาลสังขละบุรี", "F11.00", "Opioids, Acute intoxication, Uncomplicated", 4], ["โรงพยาบาลสังขละบุรี", "M94.0", "กลุ่มอาการรอยต่อกระดูกอ่อนซีโครง (ทีสเซ)", 3], ["โรงพยาบาลสังขละบุรี", "R10.1", "ปวดเฉพาะท้องส่วนบน", 2], ["โรงพยาบาลสังขละบุรี", "F10.1", "ความผิดปกติทางจิตและพฤติกรรมที่เกิดจากการเสพสุรา การเสพอย่างอันตราย", 2], ["โรงพยาบาลสังขละบุรี", "F10.2", "ความผิดปกติทางจิตและพฤติกรรมที่เกิดจากการเสพสุรา กลุ่มอาการติดยา", 2], ["โรงพยาบาลสังขละบุรี", "F10.20", "Alcohol, Dependence sydrome, Currently abstinent", 2], ["โรงพยาบาลสังขละบุรี", "F15.23", "Other stimulants including caffeine, Dependence sydrome, Currently abstinent, but receiving treatment with aversive or blocking drugs", 2], ["โรงพยาบาลสังขละบุรี", "F17.9", "ความผิดปกติทางจิตและพฤติกรรมที่เกิดจากการเสพยาสูบ ความผิดปกติอื่นทางจิตและพฤติกรรมที่ไม่ระบุรายละเอียด", 2], ["โรงพยาบาลสังขละบุรี", "F19.2", "ความผิดปกติทางจิตและพฤติกรรมที่เกิดจากการเสพยาหลายขนานและสารออกฤทธิ์ต่อจิตประสาทอื่น กลุ่มอาการติดยา", 1], ["โรงพยาบาลสังขละบุรี", "F19.20", "Multiple drug use and use of other psychoactive substances, Dependence sydrome, Currently abstinent", 1], ["โรงพยาบาลสังขละบุรี", "F19.50", "Multiple drug use and use of other psychoactive substances, Psychotic disorder, Schizophrenia-like", 1], ["โรงพยาบาลสังขละบุรี", "F20.00", "โรคจิตเภทแบบระแวง ต่อเนื่อง รวมถึงดื้อต่อการรักษา", 1], ["โรงพยาบาลสังขละบุรี", "F20.90", "โรคจิตเภทไม่ระบุรายละเอียด ต่อเนื่อง รวมถึงดื้อต่อการรักษา", 1], ["โรงพยาบาลสังขละบุรี", "F15.21", "Other stimulants including caffeine, Dependence sydrome, Currently abstinent, but in a protected environment", 1], ["โรงพยาบาลสังขละบุรี", "F25.0", "ความผิดปกติแบบโรคจิตเภทกึ่งอารมณ์แปรปรวนชนิดเมเนีย", 1], ["โรงพยาบาลสังขละบุรี", "F12.0", "ความผิดปกติทางจิตและพฤติกรรมที่เกิดจากการเสพกัญชา เป็นพิษเฉียบพลัน", 1], ["โรงพยาบาลสังขละบุรี", "F11.2", "ความผิดปกติทางจิตและพฤติกรรมที่เกิดจากการเสพฝิ่นและอนุพันธ์ของฝิ่น กลุ่มอาการติดยา", 1], ["โรงพยาบาลสังขละบุรี", "I10", "ความดันโลหิตสูงไม่ทราบสาเหตุ (ปฐมภูมิ)", 1], ["โรงพยาบาลสังขละบุรี", "J00", "คอหอยส่วนจมูกอักเสบเฉียบพลัน (ไข้หวัด)", 1], ["โรงพยาบาลสังขละบุรี", "K12.09", "แอ็ฟทาที่กลับเป็นซ้ำ ไม่ระบุรายละเอียด", 1], ["โรงพยาบาลสังขละบุรี", "M10.99", "โรคเกาต์ ไม่ระบุรายละเอียดไม่ระบุตำแหน่ง", 1], ["โรงพยาบาลสังขละบุรี", "F10.9", "ความผิดปกติทางจิตและพฤติกรรมที่เกิดจากการเสพสุรา ความผิดปกติอื่นทางจิตและพฤติกรรมที่ไม่ระบุรายละเอียด", 1], ["โรงพยาบาลสังขละบุรี", "F10.02", "Alcohol, Acute intoxication, With other medical complications", 1], ["โรงพยาบาลสังขละบุรี", "F10", "ความผิดปกติทางจิตและพฤติกรรมที่เกิดจากการเสพสุรา", 1], ["โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "U07.2", "โรคติดเชื้อไวรัสโคโรนา (COVID-19, not identified)", 31], ["โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "K35", "ไส้ติ่งอักเสบเฉียบพลัน", 23], ["โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "I10", "ความดันโลหิตสูงไม่ทราบสาเหตุ (ปฐมภูมิ)", 9], ["โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "E78.0", "ภาวะคอเลสเตอรอลในเลือดสูงเกินอย่างเดียว", 7], ["โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "J20", "หลอดลมอักเสบเฉียบพลัน", 3], ["โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "G43", "โรคไมเกรน", 3], ["โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "M62.6", "กล้ามเนื้อเคล็ด", 2], ["โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "K59.0", "ท้องผูก", 2], ["โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "J45", "โรคหืด", 2], ["โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "J00", "คอหอยส่วนจมูกอักเสบเฉียบพลัน (ไข้หวัด)", 1], ["โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "J06.9", "การติดเชื้อทางเดินหายใจส่วนบนเฉียบพลัน ไม่ระบุรายละเอียด", 1], ["โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "J30", "เยื่อจมูกอักเสบจากการปรับขนาดหลอดเลือดและภูมิแพ้", 1], ["โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "J30.3", "เยื่อจมูกอักเสบจากภูมิแพ้อื่น", 1], ["โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "L23", "ผิวหนังอักเสบจากสัมผัสภูมิแพ้", 1], ["โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "L50", "ลมพิษ", 1], ["โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "M10.0", "โรคเกาต์ที่ไม่ทราบสาเหตุ", 1], ["โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "U11.9", "โรคติดเชื้อไวรัสโคโรนา 2019", 1], ["โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "A09", "กระเพาะอาหารกับลำไส้อักเสบ และลำไส้ใหญ่อักเสบจากการติดเชื้อและจากสาเหตุที่ไม่ระบุรายละเอียด", 1], ["โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "Z51.5", "การดูแลบรรเทาอาการ", 1], ["โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "C54.1", "เนื้องอกร้ายของเยื่อบุมดลูก", 1], ["โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "E11.4", "เบาหวานชนิดที่ไม่ต้องพึ่งอินซูลิน ร่วมกับภาวะแทรกซ้อนทางประสาท", 1], ["โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "E78.2", "ภาวะไขมันในเลือดสูงเกินแบบผสม", 1], ["โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "E78.5", "ภาวะไขมันในเลือดสูงเกิน ไม่ระบุรายละเอียด", 1], ["โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "F51.0", "โรคนอนไม่หลับที่ไม่ได้เกิดจากโรคทางกาย", 1], ["โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "G44", "กลุ่มอาการปวดศีรษะแบบอื่น", 1], ["โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "I25.2", "กล้ามเนื้อหัวใจตายในอดีต", 1], ["โรงพยาบาลสมเด็จพระสังฆราชองค์ที่ 19", "I67", "โรคหลอดเลือดสมองอื่น", 1], ["โรงพยาบาลห้วยกระเจาเฉลิมพระเกียรติ ๘๐ พรรษา", "N39.0", "การติดเชื้อในทางเดินปัสสาวะ ไม่ระบุตำแหน่ง", 5], ["โรงพยาบาลห้วยกระเจาเฉลิมพระเกียรติ ๘๐ พรรษา", "E10", "เบาหวานชนิดที่ต้องพึ่งอินซูลิน", 3], ["โรงพยาบาลห้วยกระเจาเฉลิมพระเกียรติ ๘๐ พรรษา", "F12.02", "Cannabinoids, Acute intoxication, With other medical complications", 2], ["โรงพยาบาลห้วยกระเจาเฉลิมพระเกียรติ ๘๐ พรรษา", "F15.0", "ความผิดปกติทางจิตและพฤติกรรมที่เกิดจากการเสพสารกระตุ้นระบบประสาทอื่นรวมทั้งกาแฟ เป็นพิษเฉียบพลัน", 1], ["โรงพยาบาลห้วยกระเจาเฉลิมพระเกียรติ ๘๐ พรรษา", "F15.00", "Other stimulants including caffeine, Acute intoxication, Uncomplicated", 1], ["โรงพยาบาลห้วยกระเจาเฉลิมพระเกียรติ ๘๐ พรรษา", "F20", "โรคจิตเภท", 1], ["โรงพยาบาลห้วยกระเจาเฉลิมพระเกียรติ ๘๐ พรรษา", "I10", "ความดันโลหิตสูงไม่ทราบสาเหตุ (ปฐมภูมิ)", 1], ["โรงพยาบาลห้วยกระเจาเฉลิมพระเกียรติ ๘๐ พรรษา", "I64", "โรคอัมพาตฉับพลัน ไม่ระบุว่าเกิดจากเลือดออกหรือเนื้อสมองตายเพราะขาดเลือด", 1], ["โรงพยาบาลห้วยกระเจาเฉลิมพระเกียรติ ๘๐ พรรษา", "J16", "ปอดบวมที่เกิดจากเชื้ออื่น มิได้จำแนกไว้", 1], ["โรงพยาบาลห้วยกระเจาเฉลิมพระเกียรติ ๘๐ พรรษา", "J18", "ปอดบวม ไม่ระบุเชื้อต้นเหตุ", 1], ["โรงพยาบาลห้วยกระเจาเฉลิมพระเกียรติ ๘๐ พรรษา", "R54", "วัยชรา", 1], ["โรงพยาบาลห้วยกระเจาเฉลิมพระเกียรติ ๘๐ พรรษา", "Z51.5", "การดูแลบรรเทาอาการ", 1], ["โรงพยาบาลห้วยกระเจาเฉลิมพระเกียรติ ๘๐ พรรษา", "E16.0", "ภาวะน้ำตาลในเลือดต่ำจากยา ไม่มีภาวะโคม่า", 1], ["โรงพยาบาลห้วยกระเจาเฉลิมพระเกียรติ ๘๐ พรรษา", "F12.0", "ความผิดปกติทางจิตและพฤติกรรมที่เกิดจากการเสพกัญชา เป็นพิษเฉียบพลัน", 1], ["โรงพยาบาลพยาบาลสถานพระบารมี", "N39.0", "การติดเชื้อในทางเดินปัสสาวะ ไม่ระบุตำแหน่ง", 6], ["โรงพยาบาลพยาบาลสถานพระบารมี", "I10", "ความดันโลหิตสูงไม่ทราบสาเหตุ (ปฐมภูมิ)", 4], ["โรงพยาบาลพยาบาลสถานพระบารมี", "E11", "เบาหวานชนิดที่ไม่ต้องพึ่งอินซูลิน", 1], ["โรงพยาบาลพยาบาลสถานพระบารมี", "E78", "ความผิดปกติของเมตะบอลิซึมของไลโปโปรตีนและภาวะไขมันในเลือดอื่น", 1], ["โรงพยาบาลพยาบาลสถานพระบารมี", "J18", "ปอดบวม ไม่ระบุเชื้อต้นเหตุ", 1], ["โรงพยาบาลพยาบาลสถานพระบารมี", "J18.0", "ปอดบวมชนิดบร็องโค ไม่ระบุรายละเอียด", 1], ["โรงพยาบาลพยาบาลสถานพระบารมี", "L89.1", "Stage II decubitus ulcer", 1], ["โรงพยาบาลพยาบาลสถานพระบารมี", "M48.05", "ช่องไขสันหลังตีบ บริเวณทรวงอกร่วมเอว", 1], ["โรงพยาบาลพยาบาลสถานพระบารมี", "A41", "การติดเชื้ออื่นในกระแสเลือด", 1], ["โรงพยาบาลพยาบาลสถานพระบารมี", "O23.9", "การติดเชื้ออื่นและที่ไม่ระบุรายละเอียดของระบบสืบพันธุ์และทางเดินปัสสาวะระหว่างตั้งครรภ์", 1], ["โรงพยาบาลพยาบาลสถานพระบารมี", "E10", "เบาหวานชนิดที่ต้องพึ่งอินซูลิน", 1], ["โรงพยาบาลไทรโยค", "F11.20", "Opioids, Dependence sydrome, Currently abstinent", 3], ["โรงพยาบาลไทรโยค", "F12.20", "Cannabinoids, Dependence sydrome, Currently abstinent", 1], ["โรงพยาบาลไทรโยค", "F15.2", "ความผิดปกติทางจิตและพฤติกรรมที่เกิดจากการเสพสารกระตุ้นระบบประสาทอื่นรวมทั้งกาแฟ กลุ่มอาการติดยา", 1], ["โรงพยาบาลไทรโยค", "F17.20", "Tobacco, Dependence sydrome, Currently abstinent", 1], ["โรงพยาบาลไทรโยค", "F51.0", "โรคนอนไม่หลับที่ไม่ได้เกิดจากโรคทางกาย", 1], ["โรงพยาบาลไทรโยค", "J12.8", "ปอดบวมที่เกิดจากไวรัสอื่น", 1], ["โรงพยาบาลไทรโยค", "J18.1", "ปอดบวมทั้งกลีบ ไม่ระบุรายละเอียด", 1], ["โรงพยาบาลไทรโยค", "K30", "อาหารไม่ย่อย", 1], ["โรงพยาบาลไทรโยค", "L89.3", "Stage IV decubitus ulcer", 1], ["โรงพยาบาลไทรโยค", "N39.0", "การติดเชื้อในทางเดินปัสสาวะ ไม่ระบุตำแหน่ง", 1], ["โรงพยาบาลไทรโยค", "O23", "การติดเชื้อของระบบสืบพันธุ์และทางเดินปัสสาวะระหว่างตั้งครรภ์", 1], ["โรงพยาบาลไทรโยค", "E87.6", "ภาวะมีโพแทสเซียมในเลือดน้อยเกิน", 1], ["โรงพยาบาลไทรโยค", "U07.1", "โรคติดเชื้อไวรัสโควิด2019", 1], ["โรงพยาบาลพหลพลพยุหเสนา", "N18.3", "Chronic kidney disease, stage 3", 2], ["โรงพยาบาลพหลพลพยุหเสนา", "B96.2", "เอสเซอริเซีย โคไล เป็นสาเหตุของโรคที่จำแนกไว้ในบทอื่น", 1], ["โรงพยาบาลพหลพลพยุหเสนา", "C16.6", "เนื้องอกร้ายด้านโค้งใหญ่ของกระเพาะอาหารไม่ระบุตำแหน่ง", 1], ["โรงพยาบาลพหลพลพยุหเสนา", "C22.0", "มะเร็งเซลล์ตับ", 1], ["โรงพยาบาลพหลพลพยุหเสนา", "E03", "ภาวะต่อมไทรอยด์ทำงานน้อยแบบอื่น", 1], ["โรงพยาบาลพหลพลพยุหเสนา", "I10", "ความดันโลหิตสูงไม่ทราบสาเหตุ (ปฐมภูมิ)", 1], ["โรงพยาบาลพหลพลพยุหเสนา", "I15.1", "ความดันโลหิตสูงจากความผิดปกติอื่นของไต", 1], ["โรงพยาบาลพหลพลพยุหเสนา", "N10", "หลอดไตฝอยและเนื้อเยื่อระหว่างหลอดไตฝอยอักเสบเฉียบพลัน", 1], ["โรงพยาบาลพหลพลพยุหเสนา", "N39.0", "การติดเชื้อในทางเดินปัสสาวะ ไม่ระบุตำแหน่ง", 1], ["โรงพยาบาลพหลพลพยุหเสนา", "N40", "การเจริญเกินของต่อมลูกหมาก", 1], ["โรงพยาบาลพหลพลพยุหเสนา", "A41.9", "การติดเชื้อในกระแสเลือด ไม่ระบุชนิด", 1], ["โรงพยาบาลพหลพลพยุหเสนา", "U07.1", "โรคติดเชื้อไวรัสโควิด2019", 1], ["โรงพยาบาลมะการักษ์", "N39.0", "การติดเชื้อในทางเดินปัสสาวะ ไม่ระบุตำแหน่ง", 2], ["โรงพยาบาลมะการักษ์", "C37", "เนื้องอกร้ายของต่อมไทมัส", 1], ["โรงพยาบาลมะการักษ์", "C50.1", "เนื้องอกร้ายของส่วนกลางของเต้านม", 1], ["โรงพยาบาลมะการักษ์", "C73", "เนื้องอกร้ายของต่อมไทรอยด์", 1], ["โรงพยาบาลมะการักษ์", "J20", "หลอดลมอักเสบเฉียบพลัน", 1], ["โรงพยาบาลมะการักษ์", "Z51.5", "การดูแลบรรเทาอาการ", 1], ["โรงพยาบาลบ่อพลอย", "Z51.5", "การดูแลบรรเทาอาการ", 2], ["โรงพยาบาลบ่อพลอย", "C34", "เนื้องอกร้ายของหลอดลมและปอด", 1], ["โรงพยาบาลบ่อพลอย", "J15", "ปอดบวมที่เกิดจากแบคทีเรีย มิได้จำแนกไว้ที่ใด", 1], ["โรงพยาบาลบ่อพลอย", "J44.1", "โรคปอดอุดกั้นเรื้อรังร่วมกับการกำเริบเฉียบพลันไม่ระบุรายละเอียด", 1], ["โรงพยาบาลบ่อพลอย", "Z71", "บุคคลที่ขอรับบริการทางสาธารณสุขเพื่อการปรึกษาและคำแนะนำทางแพทย์อื่น ที่มิได้มีรหัสระบุไว้ที่อื่น", 1], ["โรงพยาบาลท่ากระดาน", "J15", "ปอดบวมที่เกิดจากแบคทีเรีย มิได้จำแนกไว้ที่ใด", 2], ["โรงพยาบาลท่ากระดาน", "N10", "หลอดไตฝอยและเนื้อเยื่อระหว่างหลอดไตฝอยอักเสบเฉียบพลัน", 2], ["โรงพยาบาลท่ากระดาน", "C50.2", "เนื้องอกร้ายของเสี้ยวบนด้านในของเต้านม", 1], ["โรงพยาบาลท่ากระดาน", "J15.8", "ปอดบวมที่เกิดจากแบคทีเรียชนิดอื่น", 1], ["โรงพยาบาลท่ากระดาน", "L89.3", "Stage IV decubitus ulcer", 1], ["โรงพยาบาลท่ากระดาน", "Z51.5", "การดูแลบรรเทาอาการ", 1], ["โรงพยาบาลด่านมะขามเตี้ย", "E10", "เบาหวานชนิดที่ต้องพึ่งอินซูลิน", 2], ["โรงพยาบาลด่านมะขามเตี้ย", "I10", "ความดันโลหิตสูงไม่ทราบสาเหตุ (ปฐมภูมิ)", 1], ["โรงพยาบาลทองผาภูมิ", "Z51.5", "การดูแลบรรเทาอาการ", 2], ["โรงพยาบาลทองผาภูมิ", "J44.1", "โรคปอดอุดกั้นเรื้อรังร่วมกับการกำเริบเฉียบพลันไม่ระบุรายละเอียด", 1], ["โรงพยาบาลเจ้าคุณไพบูลย์พนมทวน", "I10", "ความดันโลหิตสูงไม่ทราบสาเหตุ (ปฐมภูมิ)", 1], ["โรงพยาบาลศุกร์ศิริศรีสวัสดิ์", "C25", "เนื้องอกร้ายของตับอ่อน", 1], ["โรงพยาบาลศุกร์ศิริศรีสวัสดิ์", "C78.7", "เนื้องอกร้ายทุติยภูมิของตับและท่อน้ำดีในตับ", 1], ["โรงพยาบาลศุกร์ศิริศรีสวัสดิ์", "Z51.5", "การดูแลบรรเทาอาการ", 1]]};      /* ข้อมูลสำรอง: แสดงทันทีขณะรอโหลด และใช้เมื่อเชื่อมต่อไม่ได้ */
+let ASOF = "ข้อมูล ณ วันที่ 3 พฤศจิกายน 2569";
+
+const ST = [
+  {k:"กำลังรักษา",i:5,c:"#3AA8E0"},{k:"หายป่วย",i:6,c:"#1FA971"},{k:"อาการทุเลา",i:7,c:"#8ED9B8"},
+  {k:"อาการไม่ทุเลา",i:8,c:"#F8A5C2"},{k:"เสียชีวิต",i:9,c:"#EC4C8A"}];
+const PAL = ["#EC4C8A","#1FA971","#3AA8E0","#F8A5C2","#8ED9B8","#8CCBEF","#C2185B","#0E7C5A","#1B7FB5","#F48FB1"];
+const G = {A:"โรคติดเชื้อและปรสิต",B:"โรคติดเชื้อและปรสิต",C:"เนื้องอก/มะเร็ง และโรคเลือด",D:"เนื้องอก/มะเร็ง และโรคเลือด",
+  E:"ต่อมไร้ท่อและเมตาบอลิก",F:"จิตเวชและสารเสพติด",G:"ระบบประสาท",H:"ตาและหู",I:"ระบบไหลเวียนเลือด",J:"ระบบหายใจ",
+  K:"ระบบย่อยอาหาร",L:"ผิวหนัง",M:"กล้ามเนื้อและกระดูก",N:"ระบบปัสสาวะและสืบพันธุ์",O:"ตั้งครรภ์ คลอด และพิการแต่กำเนิด",
+  P:"ตั้งครรภ์ คลอด และพิการแต่กำเนิด",Q:"ตั้งครรภ์ คลอด และพิการแต่กำเนิด",R:"อาการและผลตรวจผิดปกติ",
+  S:"การบาดเจ็บและสาเหตุภายนอก",T:"การบาดเจ็บและสาเหตุภายนอก",U:"โควิด-19 และรหัสพิเศษ",V:"การบาดเจ็บและสาเหตุภายนอก",
+  W:"การบาดเจ็บและสาเหตุภายนอก",X:"การบาดเจ็บและสาเหตุภายนอก",Y:"การบาดเจ็บและสาเหตุภายนอก",Z:"ปัจจัยที่มีผลต่อสุขภาพ"};
+
+const n = v => Number(v).toLocaleString("en-US");
+const pct = (a,b) => b ? (a/b*100).toFixed(1)+"%" : "-";
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const clip = (s,k) => s.length>k ? s.slice(0,k)+"…" : s;
+const sum = (arr,i) => arr.reduce((a,r)=>a+(+r[i]||0),0);
+
+/* ===== คำนวณ ===== */
+function calc(D){
+  const H = D.hosp, DX = D.diag;
+  const adm = sum(H,4);
+  const tot = ST.map(s => sum(H,s.i));
+  const hospRank = H.map((r,ix)=>({r,ix})).sort((a,b)=>b.r[4]-a.r[4]||a.ix-b.ix).map(o=>o.r);
+  const dxTot = sum(DX,2);
+  const dxRank = DX.map((r,ix)=>({r,ix})).sort((a,b)=>b.r[2]-a.r[2]||a.ix-b.ix).map(o=>o.r);
+  const gm = new Map();
+  DX.forEach(r => { const g = G[String(r[0]||"")[0]] || "อื่นๆ"; gm.set(g,(gm.get(g)||0)+(+r[2]||0)); });
+  const groups = [...gm.entries()].map(([name,c],ix)=>({name,c,ix})).sort((a,b)=>b.c-a.c||a.ix-b.ix);
+  return {H,DX,DH:D.dh||[],adm,tot,hospRank,dxTot,dxRank,groups};
+}
+
+/* ===== ไอคอน/ส่วนประกอบ ===== */
+const IC = {
+  hosp:'<svg viewBox="0 0 24 24"><path d="M4 21V7l8-4 8 4v14M2 21h20"/><path d="M12 9v6M9 12h6"/></svg>',
+  bed:'<svg viewBox="0 0 24 24"><path d="M3 18V6M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="10.5" r="1.8"/></svg>',
+  heart:'<svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.4A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/><path d="M6 12h3l1.5-3 2 6 1.5-3H18"/></svg>',
+  ok:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 9.5"/></svg>',
+  up:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 14l4-4 4 4"/></svg>',
+  warn:'<svg viewBox="0 0 24 24"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.01"/></svg>',
+  rib:'<svg viewBox="0 0 24 24"><path d="M9 3c-1.8 0-3 1.3-3 3s1.2 3 3 4l6 4c1.8 1 3 2.3 3 4s-1.2 3-3 3"/><path d="M15 3c1.8 0 3 1.3 3 3s-1.2 3-3 4l-6 4c-1.8 1-3 2.3-3 4s1.2 3 3 3"/></svg>',
+  list:'<svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/></svg>',
+  chart:'<svg viewBox="0 0 24 24"><path d="M4 20V4M4 20h16M8 16v-5M12 16V8M16 16v-3"/></svg>'
+};
+const kpi = (ico,lab,val,sub,acc,tint,deep) =>
+  `<div class="kpi" style="--acc:${acc};--tint:${tint};--deep:${deep}"><div class="ico">${IC[ico]}</div><div><div class="lab">${lab}</div><div class="val">${val}</div><div class="sub">${sub}</div></div></div>`;
+const sec = (ico,t) => `<div class="sec"><i>${IC[ico]}</i>${t}</div>`;
+
+let donutSeq=0;
+function donut(parts,cLab,cVal,cls){
+  const id=++donutSeq;
+  const total = parts.reduce((a,p)=>a+p.v,0) || 1; const R=78, C=2*Math.PI*R; let off=0, arcs="";
+  parts.forEach((p,k)=>{ const len=p.v/total*C;
+    if(p.v>0) arcs += `<circle class="sl" data-i="${id}-${k}" data-l="${esc(p.full||p.l)}" data-v="${n(p.v)}" data-p="${pct(p.v,total)}" data-c="${p.c}" cx="105" cy="105" r="${R}" fill="none" stroke="${p.c}" stroke-width="30" stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-off}" transform="rotate(-90 105 105)"></circle>`;
+    off += len; });
+  const lg = parts.map((p,k)=>`<div class="lr" data-i="${id}-${k}" data-l="${esc(p.full||p.l)}" data-v="${n(p.v)}" data-p="${pct(p.v,total)}" data-c="${p.c}"><b class="sw" style="background:${p.c}"></b><span class="nm">${esc(p.l)}</span><span class="n">${n(p.v)}</span><span class="p">${pct(p.v,total)}</span></div>`).join("");
+  return `<div class="donutwrap ${cls||""}"><svg viewBox="0 0 210 210">${arcs}<text x="105" y="100" text-anchor="middle" font-size="12" fill="#5F6B76">${cLab}</text><text x="105" y="126" text-anchor="middle" font-size="28" font-weight="800" fill="#0E7C5A">${cVal}</text></svg><div class="lg">${lg}</div></div>`;
+}
+
+/* ===== ภาพประกอบหัวหน้า ===== */
+function bld(x,y,w,h,cross){
+  let s = `<rect x="${x}" y="${y-h}" width="${w}" height="${h}" rx="5" fill="#fff"/>`;
+  const cols = Math.max(2,Math.floor(w/26)), rows = Math.max(2,Math.floor((h-30)/30));
+  for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) s += `<rect x="${x+(w/(cols+1))*(c+1)-6}" y="${y-h+14+r*((h-44)/rows)}" width="12" height="15" rx="2" fill="#BEE1F0"/>`;
+  s += `<rect x="${x+w/2-10}" y="${y-26}" width="20" height="26" rx="3" fill="#96CDE6"/>`;
+  if(cross){ const cx=x+w/2, cy=y-h-6; s+=`<circle cx="${cx}" cy="${cy}" r="19" fill="#fff"/><rect x="${cx-4.5}" y="${cy-12}" width="9" height="24" rx="2" fill="#EC4C8A"/><rect x="${cx-12}" y="${cy-4.5}" width="24" height="9" rx="2" fill="#EC4C8A"/>`; }
+  return s;
+}
+const heartPath = (cx,cy,s) => { let p=[]; for(let a=0;a<=360;a+=6){ const t=a*Math.PI/180; const x=16*Math.pow(Math.sin(t),3); const y=13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t); p.push((cx+x*s).toFixed(1)+","+(cy-y*s).toFixed(1)); } return `<polygon points="${p.join(" ")}" fill="#EC4C8A"/>`; };
+const SCENES = {
+  ov:()=>`<svg viewBox="0 0 520 200" preserveAspectRatio="xMaxYMax meet">${heartPath(250,92,3.7)}${bld(300,185,90,70,false)}${bld(398,185,125,100,true)}${bld(215,185,60,55,false)}</svg>`,
+  hp:()=>`<svg viewBox="0 0 520 200" preserveAspectRatio="xMaxYMax meet">${bld(190,185,100,85,true)}${bld(310,185,140,110,true)}${bld(462,185,56,60,false)}<polyline points="20,80 90,80 108,58 126,98 146,40 166,116 184,80 240,80" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/></svg>`,
+  dx:()=>`<svg viewBox="0 0 520 200" preserveAspectRatio="xMaxYMax meet"><rect x="250" y="26" width="110" height="148" rx="10" fill="#fff"/><rect x="278" y="16" width="54" height="24" rx="7" fill="#EC4C8A"/>
+    ${[0,1,2,3].map(i=>`<rect x="266" y="${62+i*22}" width="${i%2?60:78}" height="8" rx="4" fill="#CDE8F4"/>`).join("")}
+    <rect x="330" y="142" width="8" height="22" rx="2" fill="#1FA971"/><rect x="323" y="149" width="22" height="8" rx="2" fill="#1FA971"/>
+    ${heartPath(430,100,3.5)}<polyline points="60,150 120,150 136,128 152,166 170,110 190,176 206,150 240,150" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/></svg>`
+};
+const HEAD = {
+  ov:["Dashboard ภาพรวมจังหวัด","HomeWard (A-MED Homeward) • จังหวัดกาญจนบุรี"],
+  hp:["สถานการณ์รายโรงพยาบาล","HomeWard (A-MED Homeward) • จังหวัดกาญจนบุรี"],
+  dx:["การวินิจฉัยโรคที่พบ","HomeWard (A-MED Homeward) • จังหวัดกาญจนบุรี"]
+};
+
+/* ===== หน้าต่างๆ ===== */
+function viewOv(S){
+  const {H,adm,tot} = S;
+  const G1=["#1FA971","#E3F6EC","#0E7C5A"], B1=["#3AA8E0","#E3F2FB","#1B7FB5"], P1=["#EC4C8A","#FDE7F0","#C2185B"];
+  const sub = k => `ร้อยละ ${pct(tot[k],adm).replace('%','')} ของ Admit`;
+  const ttl = tot.reduce((a,b)=>a+b,0);
+  return `
+  <div class="grid g4" style="margin-top:14px">
+    ${kpi("hosp","โรงพยาบาลที่เข้าร่วม",n(H.length),`มี Admit ${H.filter(r=>r[4]>0).length} แห่ง`,...G1)}
+    ${kpi("bed","Admit สะสม (ราย)",n(adm),"สะสมทั้งจังหวัด",...P1)}
+    ${kpi("heart","กำลังรักษา (ราย)",n(tot[0]),sub(0),...B1)}
+    ${kpi("ok","หายป่วย (ราย)",n(tot[1]),sub(1),...G1)}
+  </div>
+  <div class="grid g3" style="margin-top:14px">
+    ${kpi("up","อาการทุเลา (ราย)",n(tot[2]),sub(2),"#5CC59A","#E3F6EC","#0E7C5A")}
+    ${kpi("warn","อาการไม่ทุเลา (ราย)",n(tot[3]),sub(3),"#F48FB1","#FDE7F0","#C2185B")}
+    ${kpi("rib","เสียชีวิต (ราย)",n(tot[4]),sub(4),...P1)}
+  </div>
+  ${sec("chart","ผลการรักษาผู้ป่วย HomeWard จังหวัดกาญจนบุรี")}
+  <div class="grid g2">
+    <div class="tw"><table><thead><tr><th class="l">สถานะ</th><th>จำนวน (ราย)</th><th>ร้อยละ</th></tr></thead><tbody>
+      ${ST.map((s,k)=>`<tr><td class="l"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${s.c};margin-right:8px"></span>${s.k}</td><td>${n(tot[k])}</td><td>${pct(tot[k],adm)}</td></tr>`).join("")}
+      <tr class="tot"><td class="l">รวม</td><td>${n(ttl)}</td><td>${pct(ttl,adm)}</td></tr></tbody></table>
+      <div class="note" style="padding:0 12px 10px">${ttl===adm?"✔ ผลรวมตรงกับ Admit สะสม":"⚠ ผลรวมไม่ตรงกับ Admit สะสม กรุณาตรวจข้อมูล"}</div></div>
+    <div class="card"><h3>สัดส่วนผลการรักษา</h3>${donut(ST.map((s,k)=>({l:s.k,v:tot[k],c:s.c})),"Admit สะสม",n(adm))}</div>
+  </div>
+  <div class="note">${ASOF}</div>`;
+}
+
+let HSEL=null, S_CUR=null;
+const TINT = {"Admit สะสม":["#EC4C8A","#FDE7F0","#C2185B"],"กำลังรักษา":["#3AA8E0","#E3F2FB","#1B7FB5"],"หายป่วย":["#1FA971","#E3F6EC","#0E7C5A"],
+  "อาการทุเลา":["#5CC59A","#E3F6EC","#0E7C5A"],"อาการไม่ทุเลา":["#F48FB1","#FDE7F0","#C2185B"],"เสียชีวิต":["#EC4C8A","#FDE7F0","#C2185B"]};
+function hospDetail(S,h){
+  const r = S.H.find(x=>x[1]===h); if(!r) return "";
+  const dis = S.DH.filter(x=>x[0]===h).map((x,i)=>({x,i})).sort((a,b)=>b.x[3]-a.x[3]||a.i-b.i).map(o=>o.x);
+  const tot = dis.reduce((a,x)=>a+(+x[3]||0),0), mx = Math.max(1,...dis.map(x=>+x[3]));
+  const mini = [["Admit สะสม",r[4]],...ST.map(s=>[s.k,r[s.i]])];
+  const stSum = ST.reduce((a,s)=>a+(+r[s.i]||0),0);
+  return `
+  <div class="card" style="margin-top:14px"><h3>${esc(h)}<span style="font-weight:400;font-size:14px;color:var(--muted)">&nbsp; อ.${esc(r[2])} ${r[3]?"ต."+esc(r[3]):""}</span></h3>
+    <div class="mini">${mini.map(([k,v])=>{const t=TINT[k];return `<div style="--acc:${t[0]};--tint:${t[1]};--deep:${t[2]}"><span>${k}</span><b>${n(v)}</b></div>`;}).join("")}</div></div>
+  <div class="grid" style="grid-template-columns:.8fr 1.2fr;margin-top:14px" id="hgrid">
+    <div class="card"><h3>ผลการรักษา</h3>${stSum>0 ? donut(ST.map(s=>({l:s.k,v:+r[s.i]||0,c:s.c})),"Admit สะสม",n(r[4]),"col") : `<div class="note" style="text-align:center;padding:40px 0">โรงพยาบาลนี้ยังไม่มีผู้ป่วย Admit</div>`}</div>
+    <div class="card"><h3>โรคที่พบในโรงพยาบาลนี้ (จำนวนสะสม)</h3>
+    ${dis.length ? `<div class="tw scroll"><table><thead><tr><th>อันดับ</th><th>รหัส</th><th class="l">ชื่อโรค</th><th>จำนวน</th><th class="l">กลุ่มโรค</th></tr></thead><tbody>
+      <tr class="tot"><td></td><td></td><td class="l">รวม ${dis.length} รหัสโรค</td><td>${n(tot)}</td><td></td></tr>
+      ${dis.map((x,i)=>`<tr><td>${i+1}</td><td><b>${esc(x[1])}</b></td><td class="l">${esc(x[2])}</td><td class="bar" style="background-image:linear-gradient(90deg,#CFE9F8 ${x[3]/mx*100}%,transparent ${x[3]/mx*100}%)"><b>${n(x[3])}</b></td><td class="l">${esc(G[String(x[1])[0]]||"อื่นๆ")}</td></tr>`).join("")}
+      </tbody></table></div><div class="note">1 คนมีได้หลายโรค จึงเป็นจำนวนการวินิจฉัยสะสม ไม่ใช่จำนวนผู้ป่วย</div>`
+     : `<div class="note" style="text-align:center;padding:40px 0">ไม่มีข้อมูลโรคของโรงพยาบาลนี้ในไฟล์ข้อมูล</div>`}
+    </div>
+  </div>`;
+}
+function viewHp(S){
+  const rows = S.hospRank;
+  const T = [4,5,6,7,8,9].map(i=>sum(rows,i));
+  const mx = Math.max(1,...rows.map(r=>r[4]));
+  return `
+  ${sec("hosp","เลือกดูรายโรงพยาบาล และโรคที่พบในโรงพยาบาลนั้น")}
+  <div class="card"><div class="selbox"><label for="hsel">▶ เลือกโรงพยาบาล</label>
+    <select id="hsel">${rows.map(r=>`<option value="${esc(r[1])}" ${r[1]===HSEL?"selected":""}>${esc(r[1])}</option>`).join("")}</select></div></div>
+  <div id="hdetail">${hospDetail(S,HSEL)}</div>
+  ${sec("list","ตารางสถานการณ์รายโรงพยาบาล (เรียงตาม Admit สะสม)")}
+  <div class="tw"><table><thead><tr><th>อันดับ</th><th class="l">โรงพยาบาล</th><th>อำเภอ</th><th>Admit สะสม</th>${ST.map(s=>`<th>${s.k}</th>`).join("")}</tr></thead><tbody>
+  <tr class="tot"><td>รวม</td><td class="l">รวมทั้งจังหวัด</td><td>รพ. ${rows.length} แห่ง</td>${T.map(v=>`<td>${n(v)}</td>`).join("")}</tr>
+  ${rows.map((r,i)=>`<tr data-h="${esc(r[1])}" class="${r[1]===HSEL?"cur":""}"><td>${i+1}</td><td class="l">${esc(r[1])}</td><td>${esc(r[2])}</td>
+    <td class="bar" style="background-image:linear-gradient(90deg,#F8C4DA ${r[4]/mx*100}%,transparent ${r[4]/mx*100}%)"><b>${n(r[4])}</b></td>
+    ${[5,6,7,8,9].map(k=>`<td>${n(r[k])}</td>`).join("")}</tr>`).join("")}
+  </tbody></table></div>
+  <div class="note">คลิกที่แถวโรงพยาบาลเพื่อดูโรคที่พบของโรงพยาบาลนั้น • ตารางคำนวณจากข้อมูลที่โหลด เรียงตาม Admit สะสมจากมากไปน้อย • ${ASOF}</div>`;
+}
+
+function viewDx(S){
+  const top = S.dxRank.slice(0,10);
+  const tp = top.map((r,i)=>({l:r[0]+" "+clip(String(r[1]),60),full:r[0]+" "+r[1],v:+r[2],c:PAL[i]}));
+  const mx = Math.max(1,...top.map(r=>r[2]));
+  const order = new Map(S.hospRank.map((r,i)=>[r[1],i]));
+  const where = code => { const m=new Map(); S.DH.forEach(x=>{ if(String(x[1]).trim()===String(code).trim()) m.set(x[0],(m.get(x[0])||0)+(+x[3]||0)); });
+    const arr=[...m.entries()].sort((a,b)=>(order.has(a[0])?order.get(a[0]):999)-(order.has(b[0])?order.get(b[0]):999));
+    return arr.length ? arr.map(([h,c])=>`<span class="hc" title="${esc(h)}">${esc(h.replace("โรงพยาบาล","รพ."))} <b>(${n(c)})</b></span>`).join("") : "-"; };
+  return `
+  ${sec("chart","กราฟโรคที่พบมากที่สุด (Top 10)")}
+  <div class="card"><h3>Top 10 โรคที่พบมากที่สุด (จำนวนสะสม)</h3>${donut(tp,"รวม 10 อันดับ",n(tp.reduce((a,p)=>a+p.v,0)),"wide")}</div>
+  ${sec("list","Top 10 โรคที่พบมากที่สุด (จำนวนสะสม) และโรงพยาบาลที่พบ")}
+  <div class="tw"><table><thead><tr><th>อันดับ</th><th>รหัส</th><th class="l">ชื่อโรค</th><th>จำนวนสะสม</th><th class="l">กลุ่มโรค</th><th class="l">พบในโรงพยาบาล (จำนวนราย)</th></tr></thead><tbody>
+  ${top.map((r,i)=>`<tr><td>${i+1}</td><td><b>${esc(r[0])}</b></td><td class="l">${esc(r[1])}</td><td class="bar" style="background-image:linear-gradient(90deg,#CFE9F8 ${r[2]/mx*100}%,transparent ${r[2]/mx*100}%)"><b>${n(r[2])}</b></td><td class="l">${esc(G[String(r[0])[0]]||"อื่นๆ")}</td><td class="hl">${where(r[0])}</td></tr>`).join("")}
+  </tbody></table></div>
+  <div class="note">1 คนมีได้หลายโรค จึงเป็นจำนวนการวินิจฉัยสะสม ไม่ใช่จำนวนผู้ป่วย • ตัวเลขในวงเล็บคือจำนวนวินิจฉัยของโรคนั้นในแต่ละโรงพยาบาล • กลุ่มโรคจัดตามอักษรนำของรหัส ICD-10 • ${ASOF}</div>`;
+}
+
+/* ===== แสดงผล ===== */
+let current = "ov";
+function render(D){
+  const S = calc(D); S_CUR = S;
+  if(!HSEL || !S.H.some(r=>r[1]===HSEL)) HSEL = S.hospRank.length ? S.hospRank[0][1] : null;
+  document.getElementById("ov").innerHTML = viewOv(S);
+  document.getElementById("hp").innerHTML = viewHp(S);
+  document.getElementById("dx").innerHTML = viewDx(S);
+}
+function show(t){
+  current = t;
+  document.querySelectorAll(".tab").forEach(e=>e.classList.toggle("on",e.id===t));
+  document.querySelectorAll("nav.tabs button[data-t]").forEach(b=>b.classList.toggle("on",b.dataset.t===t));
+  document.getElementById("h-title").textContent = HEAD[t][0];
+  document.getElementById("h-sub").textContent = HEAD[t][1];
+  document.getElementById("scene").innerHTML = SCENES[t]();
+  window.scrollTo({top:0});
+}
+document.querySelectorAll("nav.tabs button[data-t]").forEach(b=>b.addEventListener("click",()=>show(b.dataset.t)));
+
+/* ===== เลือกโรงพยาบาล ===== */
+function pickHosp(h,scroll){
+  HSEL = h; document.getElementById("hdetail").innerHTML = hospDetail(S_CUR,h);
+  const sel = document.getElementById("hsel"); if(sel) sel.value = h;
+  document.querySelectorAll("tr[data-h]").forEach(t=>t.classList.toggle("cur",t.dataset.h===h));
+  if(scroll) sel.scrollIntoView({behavior:"smooth",block:"center"});
+}
+document.addEventListener("change",e=>{ if(e.target.id==="hsel") pickHosp(e.target.value,false); });
+document.addEventListener("click",e=>{ const tr=e.target.closest&&e.target.closest("tr[data-h]"); if(tr) pickHosp(tr.dataset.h,true); });
+
+/* ===== ข้อความเมื่อเอาเมาส์ชี้ที่กราฟวงกลม (ใช้ได้กับการแตะบนมือถือด้วย) ===== */
+const tip = document.getElementById("tip");
+function hlSet(i,on){ document.querySelectorAll(`[data-i="${i}"]`).forEach(e=>e.classList.toggle("hl",on)); }
+function tipShow(el,x,y){
+  tip.style.setProperty("--tc",el.dataset.c);
+  tip.innerHTML = `<b>${el.dataset.l}</b><span>จำนวน ${el.dataset.v} • ${el.dataset.p}</span>`;
+  tip.style.display = "block";
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.max(8,Math.min(x+16,innerWidth-w-8))+"px";
+  tip.style.top  = Math.max(8,Math.min(y+16,innerHeight-h-8))+"px";
+}
+let hot = null;
+function tipOver(e){
+  const el = e.target.closest && e.target.closest(".sl,.lr");
+  if(el !== hot){ if(hot) hlSet(hot.dataset.i,false); hot = el; if(hot) hlSet(hot.dataset.i,true); }
+  if(el) tipShow(el,e.clientX,e.clientY); else tip.style.display = "none";
+}
+document.addEventListener("mousemove",tipOver);
+document.addEventListener("click",tipOver);
+document.addEventListener("scroll",()=>{ tip.style.display="none"; if(hot){ hlSet(hot.dataset.i,false); hot=null; } },true);
+
+/* ===================== เชื่อมต่อ Google Sheets (ดึงข้อมูลสด) =====================
+   วิธีทำงาน: เปิดหน้า → ดึงข้อมูลทันที → ดึงซ้ำอัตโนมัติทุก REFRESH_SECONDS วินาที
+   ถ้าดึงไม่สำเร็จ จะแสดงข้อมูลสำรองที่ฝังในไฟล์ พร้อมแจ้งเตือนที่หน้าจอ
+   ข้อกำหนด: ไฟล์ Google Sheets ต้องแชร์เป็น “ทุกคนที่มีลิงก์ เป็นผู้ดู (Viewer)” */
+const CONFIG = {
+  SHEET_ID: "1CrdfijvdWjjGWNvkBA26tC2Rsz4lkaVBETTj7dmeRpQ",
+  REFRESH_SECONDS: 45,            // รอบการดึงข้อมูลซ้ำ (ปรับได้ 30–60 วินาที)
+  API_KEY: "",                    // เว้นว่าง = ใช้โหมดปกติ (ไม่ต้องมี key) | ใส่ Google API key = ใช้ Sheets API (เร็ว/เสถียรกว่า และค้นหาแท็บเองอัตโนมัติ)
+  HOSPITAL_TAB: "",               // เว้นว่าง = ใช้ “แท็บแรก” ของไฟล์ (ตารางสถานการณ์โรงพยาบาล)
+  DISEASE_TAB: "TOP 20 Diagnoses",// แท็บรายการโรครวม
+  HOSPITAL_TABS: ["รพ.สังขละบุรี", "รพ.สมเด็จพระสังฆราชองค์ที่ 19", "รพ.ห้วยกระเจาฯ", "รพ.พยาบาลสถานฯ", "รพ.ไทรโยค", "รพ.พหลฯ", "รพ.มะการักษ์", "รพ.บ่อพลอย", "รพ.ท่ากระดาน", "รพ.ด่าน", "รพ.เลาขวัญ", "รพ.ทองผาภูมิ", "รพ.เจ้าคุณฯ", "รพ.ศุกร์ศิริฯ", "รพ.สมเด็จพระปิยฯ", "รพ.หนองปรือ"]         // แท็บโรคแยกรายโรงพยาบาล (ถ้าเพิ่มแท็บใหม่ ให้เพิ่มชื่อที่นี่ | โหมด API ไม่ต้องเพิ่ม)
+};
+const REFRESH = (()=>{ const q = +new URLSearchParams(location.search).get("refresh");   // ใช้ทดสอบ: ?refresh=10
+  return q>=5 ? q : Math.min(60,Math.max(30,CONFIG.REFRESH_SECONDS)); })();
+
+function parseCSV(t){
+  t = t.replace(/^﻿/,""); const rows=[]; let row=[], f="", q=false;
+  for(let i=0;i<t.length;i++){ const c=t[i];
+    if(q){ if(c==='"'){ if(t[i+1]==='"'){ f+='"'; i++; } else q=false; } else f+=c; }
+    else if(c==='"') q=true;
+    else if(c===","){ row.push(f); f=""; }
+    else if(c==="\n"||c==="\r"){ if(c==="\r"&&t[i+1]==="\n") i++; row.push(f); rows.push(row); row=[]; f=""; }
+    else f+=c; }
+  if(f!==""||row.length){ row.push(f); rows.push(row); }
+  return rows;
+}
+const txt = v => String(v==null?"":v).trim();
+const isNum = v => { const s=txt(v).replace(/[,\s]/g,""); return s!=="" && !isNaN(Number(s)); };
+const toNum = v => isNum(v) ? Number(txt(v).replace(/[,\s]/g,"")) : 0;
+
+/* อ่านตารางจากตำแหน่งคอลัมน์ (ไม่พึ่งชื่อหัวตาราง จึงไม่พังเมื่อ Google เดาชนิดข้อมูลผิด) */
+function parseHospitals(g){
+  const rows=[]; let asof="";
+  for(const c of g){
+    for(const cell of c){ const s=txt(cell); if(s.startsWith("หมายเหตุ")) asof = s.replace("หมายเหตุ","").trim(); }
+    if(isNum(c[0]) && txt(c[1]) && !isNum(c[1]) && isNum(c[4]))
+      rows.push([toNum(c[0]),txt(c[1]),txt(c[2]),txt(c[3]),toNum(c[4]),toNum(c[5]),toNum(c[6]),toNum(c[7]),toNum(c[8]),toNum(c[9])]);
+  }
+  return {rows,asof};
+}
+function parseDiseases(g){
+  const out=[];
+  for(const c of g){ const code=txt(c[0]), nm=txt(c[1]); if(code && nm && !isNum(code) && isNum(c[2])) out.push([code,nm,toNum(c[2])]); }
+  return out;
+}
+function hospFromTitle(g,known){           // คืนชื่อโรงพยาบาล | "" = แท็บว่าง | null = ชื่อไม่ตรงกับตารางโรงพยาบาล
+  for(const c of g.slice(0,4)){ const t=txt(c[0]); if(!t) continue;
+    const full=t.replace(/^รพ\./,"โรงพยาบาล"); if(known.has(full)) return full;
+    for(const k of known) if(k.replace("โรงพยาบาล","รพ.")===t) return k;
+    return null; }
+  return "";
+}
+function assemble(hospGrid,diseaseGrids,tabs){   // tabs = [{tab, grid|null(อ่านไม่ได้)}]
+  const H = parseHospitals(hospGrid);
+  if(!H.rows.length) throw new Error("อ่านตารางสถานการณ์โรงพยาบาลไม่ได้ (แท็บแรกของไฟล์ต้องเป็นตารางโรงพยาบาล)");
+  let diag=[]; for(const g of diseaseGrids){ diag=parseDiseases(g); if(diag.length) break; }
+  if(!diag.length) throw new Error("อ่านแท็บรายการโรค “"+CONFIG.DISEASE_TAB+"” ไม่ได้ (ตรวจชื่อแท็บ)");
+  const known = new Set(H.rows.map(r=>r[1])), dh=[], warn=[];
+  tabs.forEach(({tab,grid})=>{
+    if(!grid){ warn.push(tab); return; }
+    const full = hospFromTitle(grid,known);
+    if(full===null){ warn.push(tab); return; }
+    if(full==="") return;
+    parseDiseases(grid).forEach(x=>dh.push([full,x[0],x[1],x[2]]));
+  });
+  return {hosp:H.rows, diag, dh, asof:H.asof, warn};
+}
+
+/* โหมดปกติ: Google Visualization (gviz) — ไม่ต้องมี API key */
+async function gvizGrid(tab){
+  const u = new URL(`https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq`);
+  u.searchParams.set("tqx","out:csv"); u.searchParams.set("headers","0");
+  if(tab) u.searchParams.set("sheet",tab);
+  const r = await fetch(u,{cache:"no-store"}); const t = await r.text();
+  if(!r.ok) throw new Error("HTTP "+r.status);
+  if(/^\s*</.test(t) || /setResponse\(/.test(t)) throw new Error("เข้าถึงไฟล์ไม่ได้ — ตรวจสอบว่าแชร์เป็น “ทุกคนที่มีลิงก์ เป็นผู้ดู”");
+  return parseCSV(t);
+}
+async function loadGviz(){
+  const hg = await gvizGrid(CONFIG.HOSPITAL_TAB||"");
+  const dn = CONFIG.DISEASE_TAB.trim(), dg=[];
+  for(const nm of [dn+" ",dn]){ try{ dg.push(await gvizGrid(nm)); break; }catch(e){ /* ลองชื่อถัดไป */ } }
+  const res = await Promise.allSettled(CONFIG.HOSPITAL_TABS.map(t=>gvizGrid(t)));
+  return assemble(hg,dg,CONFIG.HOSPITAL_TABS.map((tab,i)=>({tab,grid:res[i].status==="fulfilled"?res[i].value:null})));
+}
+
+/* โหมด API: ใส่ API_KEY ใน CONFIG (เรียกครั้งเดียวได้ทุกแท็บ และค้นหาแท็บเอง) */
+async function loadApi(){
+  const base=`https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SHEET_ID}`, key=encodeURIComponent(CONFIG.API_KEY);
+  const j = async u => { const r=await fetch(u,{cache:"no-store"}); const d=await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error((d.error&&d.error.message)||("HTTP "+r.status)); return d; };
+  const titles = (await j(`${base}?fields=sheets.properties.title&key=${key}`)).sheets.map(s=>s.properties.title);
+  const q = titles.map(t=>"ranges="+encodeURIComponent(`'${t.replace(/'/g,"''")}'!A1:J500`)).join("&");
+  const vr = (await j(`${base}/values:batchGet?majorDimension=ROWS&${q}&key=${key}`)).valueRanges;
+  const grid = t => vr[titles.indexOf(t)].values || [];
+  const hosp = CONFIG.HOSPITAL_TAB || titles[0];
+  const want = CONFIG.DISEASE_TAB.trim().toLowerCase();
+  const dis = titles.find(t=>t.trim().toLowerCase()===want) || titles.find(t=>/^top/i.test(t.trim()));
+  return assemble(grid(hosp), dis?[grid(dis)]:[], titles.filter(t=>t!==hosp && t!==dis).map(tab=>({tab,grid:grid(tab)})));
+}
+
+/* ===== สถานะ + รอบการดึงข้อมูล ===== */
+const liveEl = document.getElementById("live"), liveTx = document.getElementById("livetxt"), bannerEl = document.getElementById("banner");
+function setLive(state,time,warn,err){
+  liveEl.className = "live "+state; liveEl.title = `ดึงข้อมูลใหม่ทุก ${REFRESH} วินาที • คลิกเพื่อดึงทันที`;
+  liveTx.textContent = state==="load" ? "กำลังอัปเดต…" : state==="ok" ? "สด • อัปเดตล่าสุด "+time : state==="warn" ? "สด (บางแท็บอ่านไม่ได้) • "+time
+    : state==="err" ? "เชื่อมต่อไม่ได้ • ใช้ข้อมูลล่าสุดที่มี" : state==="off" ? "ข้อมูลที่ฝังในไฟล์" : "กำลังเชื่อมต่อ…";
+  if(state==="err"){ bannerEl.className="banner err"; bannerEl.innerHTML = `ดึงข้อมูลจาก Google Sheets ไม่สำเร็จ — กำลังแสดงข้อมูลล่าสุดที่มี (${esc(ASOF)}) และจะลองใหม่ทุก ${REFRESH} วินาที<small>${esc(err||"")}</small>`; }
+  else if(state==="warn"){ bannerEl.className="banner warn"; bannerEl.innerHTML = `อ่านโรคแยกรายโรงพยาบาลจากบางแท็บไม่ได้ (ตรวจชื่อแท็บในไฟล์ Google Sheets หรือใน CONFIG.HOSPITAL_TABS)<small>${warn.map(esc).join(" • ")}</small>`; }
+  else if(state!=="load"){ bannerEl.className="banner"; bannerEl.innerHTML=""; }
+}
+let lastHash = JSON.stringify([SNAPSHOT.hosp,SNAPSHOT.diag,SNAPSHOT.dh,ASOF]), busy=false, timer=null;
+function schedule(){ clearTimeout(timer); timer=setTimeout(()=>{ document.hidden ? schedule() : tick(); }, REFRESH*1000); }
+async function tick(){
+  if(busy) return; busy=true; setLive("load");
+  try{
+    const D = await (CONFIG.API_KEY ? loadApi() : loadGviz());
+    const d = new Date(), time = d.toLocaleTimeString("th-TH",{hour12:false});
+    D.asof = D.asof || ("ข้อมูลจาก Google Sheets • ดึงเมื่อ "+d.toLocaleDateString("th-TH",{day:"numeric",month:"long",year:"numeric"}));
+    const h = JSON.stringify([D.hosp,D.diag,D.dh,D.asof]);
+    if(h!==lastHash){ lastHash=h; ASOF=D.asof; render(D); }      // วาดใหม่เฉพาะเมื่อข้อมูลเปลี่ยน (ไม่กระพริบ ไม่เสียตำแหน่งที่เลือก)
+    setLive(D.warn.length?"warn":"ok",time,D.warn);
+  }catch(e){ setLive("err",null,[],(e&&e.message)||String(e)); }
+  finally{ busy=false; schedule(); }
+}
+function startLive(){
+  if(!CONFIG.SHEET_ID){ setLive("off"); return; }
+  liveEl.addEventListener("click",()=>tick());
+  document.addEventListener("visibilitychange",()=>{ if(!document.hidden) tick(); });   // กลับมาเปิดหน้านี้ → ดึงทันที
+  tick();
+}
+
+
+render(SNAPSHOT); show("ov"); startLive();
+</script>
+</body>
+</html>
