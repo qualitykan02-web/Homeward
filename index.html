@@ -494,7 +494,7 @@ async function loadApi(){
 const liveEl = document.getElementById("live"), liveTx = document.getElementById("livetxt"), bannerEl = document.getElementById("banner");
 function setLive(state,time,warn,err){
   liveEl.className = "live "+state; liveEl.title = `ดึงข้อมูลใหม่ทุก ${REFRESH} วินาที • คลิกเพื่อดึงทันที`;
-  liveTx.textContent = state==="load" ? "กำลังอัปเดต…" : state==="ok" ? "สด • อัปเดตล่าสุด "+time : state==="warn" ? "สด (บางแท็บอ่านไม่ได้) • "+time
+  liveTx.textContent = state==="load" ? "กำลังอัปเดต…" : state==="ok" ? "Refresh • อัปเดตล่าสุด "+time : state==="warn" ? "Refresh (บางแท็บอ่านไม่ได้) • "+time
     : state==="err" ? "เชื่อมต่อไม่ได้ • ใช้ข้อมูลล่าสุดที่มี" : state==="off" ? "ข้อมูลที่ฝังในไฟล์" : "กำลังเชื่อมต่อ…";
   if(state==="err"){ bannerEl.className="banner err"; bannerEl.innerHTML = `ดึงข้อมูลจาก Google Sheets ไม่สำเร็จ — กำลังแสดงข้อมูลล่าสุดที่มี (${esc(ASOF)}) และจะลองใหม่ทุก ${REFRESH} วินาที<small>${esc(err||"")}</small>`; }
   else if(state==="warn"){ bannerEl.className="banner warn"; bannerEl.innerHTML = `อ่านโรคแยกรายโรงพยาบาลจากบางแท็บไม่ได้ (ตรวจชื่อแท็บในไฟล์ Google Sheets หรือใน CONFIG.HOSPITAL_TABS)<small>${warn.map(esc).join(" • ")}</small>`; }
